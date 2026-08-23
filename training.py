@@ -5,15 +5,16 @@ import os
 # 1. Load YOLO Model
 # =========================
 model = YOLO("yolov8s.pt")
-dataset_path = os.
+dataset_path = os.path.join(os.getcwd(), "pcb-defect-dataset-clahe")
+data_yaml_path = os.path.join(dataset_path, "data.yaml")
 
 
 # =========================
 # 2. Train
 # =========================
 results = model.train(
-    data=r"C:\Y3S1\image processing\assignment\pcb-defect-preprocessed\data.yaml",
-    epochs=100,
+    data=data_yaml_path,
+    epochs=30,
     imgsz=640,
     batch=16,
     device=0,
@@ -28,7 +29,7 @@ results = model.train(
 # 3. Validate
 # =========================
 metrics = model.val(
-    data=r"C:\Y3S1\image processing\assignment\pcb-defect-preprocessed\data.yaml",
+    data=data_yaml_path,
     cache=True,
     device=0,
     workers=0

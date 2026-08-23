@@ -220,10 +220,7 @@ def apply_clahe(
 # 10. CREATE CLAHE DATASET
 # ============================================================
 
-CLAHE_DATASET_ROOT = (
-    "/content/drive/MyDrive/"
-    "pcb-defect-dataset-clahe"
-)
+CLAHE_DATASET_ROOT= os.path.join(os.getcwd(), "pcb-defect-dataset-clahe")
 
 
 for split in [
@@ -392,7 +389,7 @@ def preprocess_split(split):
 # ============================================================
 # 12. PROCESS TRAIN / VAL / TEST
 # ============================================================
-CLAHE_DATASET_ROOT = "/content/drive/MyDrive/pcb-defect-dataset-clahe"
+CLAHE_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-clahe")
 print("\n==============================================")
 print("STARTING CLAHE PREPROCESSING")
 print("==============================================")

@@ -10,7 +10,7 @@ from ultralytics import YOLO
 # DATASET PATH
 # ============================================================
 
-DATASET_ROOT = "./pcb-defect-dataset"
+DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset")
 
 print("Dataset exists:", os.path.exists(DATASET_ROOT))
 

@@ -16,20 +16,14 @@ from ultralytics import YOLO
 # 1. DATASET PATH
 # ============================================================
 
-DATASET_ROOT = (
-    "/content/drive/MyDrive/"
-    "pcb-defect-dataset"
-)
+DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset")
 
 
 # ============================================================
 # 2. HYBRID DATASET PATH
 # ============================================================
 
-HYBRID_DATASET_ROOT = (
-    "/content/drive/MyDrive/"
-    "pcb-defect-dataset-hybrid"
-)
+HYBRID_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-hybrid")
 
 
 # ============================================================

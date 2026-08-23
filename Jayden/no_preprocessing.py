@@ -11,7 +11,7 @@ from ultralytics import YOLO
 # 1. ORIGINAL DATASET
 # ============================================================
 
-DATASET_ROOT = "./pcb-defect-dataset"
+DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset")
 
 DATA_YAML = os.path.join(
     DATASET_ROOT,

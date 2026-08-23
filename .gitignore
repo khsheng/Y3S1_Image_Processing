@@ -3,3 +3,7 @@ pcb-defect-dataset/
 runs/
 
 yolo*
+
+pcb-defect-dataset-clahe/
+
+pcb-defect-dataset/

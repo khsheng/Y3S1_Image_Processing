@@ -7,3 +7,19 @@ yolo*
 pcb-defect-dataset-clahe/
 
 pcb-defect-dataset/
+
+pcb-defect-dataset-sharpening/
+
+pcb-defect-dataset-hybrid/
+
+pcb-defect-dataset-median/
+
+pcb-defect-dataset-median-clahe/
+
+pcb-defect-dataset-median-sharpen
+
+find_file.py
+
+validate.py
+
+u-net_training.py

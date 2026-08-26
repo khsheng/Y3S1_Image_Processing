@@ -1,5 +1,7 @@
 pcb-defect-dataset/
 
+pcb-defect-*/
+
 runs/
 
 yolo*

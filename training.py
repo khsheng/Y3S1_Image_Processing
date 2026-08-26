@@ -5,10 +5,10 @@ import os
 # 1. Load YOLO Model
 # =========================
 model = YOLO("yolov8s.pt")
-dataset_path = os.path.join(os.getcwd(), "pcb-defect-dataset")
+dataset_path = os.path.join(os.getcwd(), "pcb-defect-preprocessed")
 data_yaml_path = os.path.join(dataset_path, "data.yaml")
 
-result_folder_name = "pcb_defect"
+result_folder_name = "pcb_preprocessed"
 
 
 # =========================
@@ -22,7 +22,7 @@ results = model.train(
     device=0,
     workers=0,
     cache=True,
-    project="runs",
+    project="runs_khs",
     name=result_folder_name
 )
 

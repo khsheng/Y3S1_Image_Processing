@@ -6,10 +6,10 @@ if __name__ == "__main__":
   # 1. Load YOLO Model
   # =========================
   model = YOLO("yolov8s.pt")
-  dataset_path = os.path.join(os.getcwd(), "pcb-defect-dataset")
+  dataset_path = os.path.join(os.getcwd(), "pcb-defect-dataset-median_filtering_(K=9)_and_CLAHE+EdgeEnhancement")
   data_yaml_path = os.path.join(dataset_path, "data.yaml")
 
-  result_folder_name = "yolov8s_with_pcb-defect-dataset"
+  result_folder_name = "yolov8s_with_pcb-defect-dataset-median_filtering_(K=9)_and_CLAHE+EdgeEnhancement"
 
   # =========================
   # 2. Train

@@ -156,7 +156,7 @@ def apply_median_and_clahe(
 # 10. CREATE COMBINED DATASET DIRECTORY
 # ============================================================
 
-COMBINED_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-median-clahe")
+COMBINED_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-median-(K=3)-clahe")
 
 
 for split in [

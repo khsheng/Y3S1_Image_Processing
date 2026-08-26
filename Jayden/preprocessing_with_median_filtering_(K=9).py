@@ -120,42 +120,25 @@ print("Testing labels    :", len(test_labels))
 
 
 # ============================================================
-# 9. APPLY COMBINED MEDIAN FILTER + SHARPENING FUNCTION
+# 9. APPLY MEDIAN FILTER FUNCTION
 # ============================================================
 
-def apply_median_and_sharpen(
+def apply_median_blur(
     image,
-    kernel_size=3,
-    alpha=1.5
+    kernel_size=3
 ):
     """
-    1. Apply Median Filter to remove impulse noise.
-    2. Apply a Sharpening filter using a 2D convolution kernel to enhance edge details.
+    Applies Median Filtering to remove noise 
+    while preserving edges. kernel_size must be an odd integer >= 3.
     """
-    # Step 1: Median Filtering
-    median_filtered = cv2.medianBlur(image, kernel_size)
-
-    # Step 2: Sharpening Kernel
-    # A standard 3x3 sharpening kernel
-    kernel = np.array([
-        [ 0, -1,  0],
-        [-1,  4 + alpha, -1],
-        [ 0, -1,  0]
-    ])
-    
-    # Alternatively, a stronger laplacian-based sharpen:
-    # kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-
-    sharpened = cv2.filter2D(median_filtered, -1, kernel)
-
-    return sharpened
+    return cv2.medianBlur(image, kernel_size)
 
 
 # ============================================================
-# 10. CREATE COMBINED DATASET DIRECTORY
+# 10. CREATE MEDIAN DATASET
 # ============================================================
 
-COMBINED_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-median-sharpen")
+MEDIAN_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-median-(K=9)")
 
 
 for split in [
@@ -165,7 +148,7 @@ for split in [
 ]:
     os.makedirs(
         os.path.join(
-            COMBINED_DATASET_ROOT,
+            MEDIAN_DATASET_ROOT,
             split,
             "images"
         ),
@@ -174,7 +157,7 @@ for split in [
 
     os.makedirs(
         os.path.join(
-            COMBINED_DATASET_ROOT,
+            MEDIAN_DATASET_ROOT,
             split,
             "labels"
         ),
@@ -183,10 +166,10 @@ for split in [
 
 
 print("\n==============================================")
-print("MEDIAN + SHARPEN DATASET")
+print("MEDIAN FILTER DATASET")
 print("==============================================")
 
-print("Combined dataset:", COMBINED_DATASET_ROOT)
+print("Median dataset:", MEDIAN_DATASET_ROOT)
 
 
 # ============================================================
@@ -205,12 +188,12 @@ def preprocess_split(split):
         "labels"
     )
     output_images = os.path.join(
-        COMBINED_DATASET_ROOT,
+        MEDIAN_DATASET_ROOT,
         split,
         "images"
     )
     output_labels = os.path.join(
-        COMBINED_DATASET_ROOT,
+        MEDIAN_DATASET_ROOT,
         split,
         "labels"
     )
@@ -231,6 +214,7 @@ def preprocess_split(split):
     processed = 0
 
     for filename in image_files:
+        # Read image
         input_path = os.path.join(
             source_images,
             filename
@@ -241,14 +225,13 @@ def preprocess_split(split):
             print("Could not read:", filename)
             continue
 
-        # Apply Median Filter + Sharpening
-        processed_image = apply_median_and_sharpen(
+        # Apply Median Filter
+        processed_image = apply_median_blur(
             image,
-            kernel_size=3,
-            alpha=1.0
+            kernel_size=9  # Adjust size as needed (must be odd: 3, 5, etc.)
         )
 
-        # Save processed image
+        # Save Median filtered image
         output_path = os.path.join(
             output_images,
             filename
@@ -290,7 +273,7 @@ def preprocess_split(split):
 # ============================================================
 
 print("\n==============================================")
-print("STARTING MEDIAN + SHARPEN PREPROCESSING")
+print("STARTING MEDIAN FILTER PREPROCESSING")
 print("==============================================")
 
 
@@ -303,21 +286,21 @@ for split in [
     preprocess_split(split)
 
 
-print("\nMedian + Sharpen preprocessing completed.")
+print("\nMedian filter preprocessing completed.")
 
 
 # ============================================================
-# 13. CREATE COMBINED DATA.YAML
+# 13. CREATE MEDIAN DATA.YAML
 # ============================================================
 
-COMBINED_DATA_YAML = os.path.join(
-    COMBINED_DATASET_ROOT,
+MEDIAN_DATA_YAML = os.path.join(
+    MEDIAN_DATASET_ROOT,
     "data.yaml"
 )
 
 
-combined_data = {
-    "path": COMBINED_DATASET_ROOT,
+median_data = {
+    "path": MEDIAN_DATASET_ROOT,
     "train": "train",
     "val": "val",
     "test": "test",
@@ -333,32 +316,32 @@ combined_data = {
 
 
 with open(
-    COMBINED_DATA_YAML,
+    MEDIAN_DATA_YAML,
     "w"
 ) as f:
     yaml.dump(
-        combined_data,
+        median_data,
         f,
         sort_keys=False
     )
 
 
 print("\n==============================================")
-print("MEDIAN + SHARPEN DATA.YAML")
+print("MEDIAN FILTER DATA.YAML")
 print("==============================================")
 
-print(COMBINED_DATA_YAML)
+print(MEDIAN_DATA_YAML)
 print()
 
 with open(
-    COMBINED_DATA_YAML,
+    MEDIAN_DATA_YAML,
     "r"
 ) as f:
     print(f.read())
 
 
 # ============================================================
-# 14. DISPLAY ORIGINAL VS MEDIAN + SHARPEN
+# 14. DISPLAY ORIGINAL VS MEDIAN FILTER
 # ============================================================
 
 sample_files = []
@@ -373,7 +356,7 @@ for filename in os.listdir(TRAIN_IMAGES):
 
 
 print("\n==============================================")
-print("ORIGINAL VS MEDIAN + SHARPEN")
+print("ORIGINAL VS MEDIAN FILTER")
 print("==============================================")
 
 
@@ -382,22 +365,22 @@ for filename in sample_files:
         TRAIN_IMAGES,
         filename
     )
-    processed_path = os.path.join(
-        COMBINED_DATASET_ROOT,
+    median_path = os.path.join(
+        MEDIAN_DATASET_ROOT,
         "train",
         "images",
         filename
     )
 
     original = cv2.imread(original_path)
-    processed_image = cv2.imread(processed_path)
+    median_image = cv2.imread(median_path)
 
     original = cv2.cvtColor(
         original,
         cv2.COLOR_BGR2RGB
     )
-    processed_image = cv2.cvtColor(
-        processed_image,
+    median_image = cv2.cvtColor(
+        median_image,
         cv2.COLOR_BGR2RGB
     )
 
@@ -409,8 +392,8 @@ for filename in sample_files:
     plt.axis("off")
 
     plt.subplot(1, 2, 2)
-    plt.imshow(processed_image)
-    plt.title("Median + Sharpen")
+    plt.imshow(median_image)
+    plt.title("Median Filter (k=3)")
     plt.axis("off")
 
     plt.tight_layout()

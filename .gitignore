@@ -1,11 +1,13 @@
 pcb-defect-*/
 
-pcb-defect-*/
+PCB-Defect-*/
 
 runs/
 
 yolo*
 
-pcb-defect-dataset-clahe/
+find_file.py
 
-pcb-defect-dataset/
+validate.py
+
+u-net_training.py

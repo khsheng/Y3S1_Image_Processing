@@ -23,7 +23,7 @@ DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset")
 # 2. HYBRID DATASET PATH
 # ============================================================
 
-HYBRID_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-hybrid")
+HYBRID_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-clahe-sharpen")
 
 
 # ============================================================

@@ -1,11 +1,11 @@
-from KHS.preprocessing_function import (
+from KHS.function.preprocessing_function import (
+    clahe_rgb,
     grayscale,
     average_filter,
     median_filter,
     median_filter,
     morphological_erosion,
     clahe,
-    eet,
     morphological_opening
 )
 import cv2
@@ -16,13 +16,9 @@ from pathlib import Path
 # 1. PATH CONFIGURATION
 # =========================================================
 
-INPUT_DATASET = Path(
-    r"C:\Y3S1\image processing\assignment\pcb-defect-dataset"
-)
+INPUT_DATASET = Path.cwd() / "pcb-defect-dataset"
 
-OUTPUT_DATASET = Path(
-    r"C:\Y3S1\image processing\assignment\pcb-defect-preprocessed"
-)
+OUTPUT_DATASET = Path.cwd() / "pcb-defect-testing"
 
 # =========================================================
 # 2. PREPROCESS IMAGE
@@ -30,19 +26,15 @@ OUTPUT_DATASET = Path(
 
 def preprocess_image(image):
 
-    # Step 1: Grayscale
-    gray = grayscale(image)
+    # median = median_filter(image)
 
-    # Step 2: Median Filtering
-    median = median_filter(gray)
+    # opened = morphological_opening(median)
 
-    # Step 3: Morphological Opening
-    opened = morphological_opening(median)
+    clahe_image = clahe_rgb(image)
 
-    # Step 5: CLAHE
-    clahe_image = clahe(opened)
-
-    return clahe_image
+    return (
+        clahe_image
+    )
 
 
 # =========================================================
@@ -78,7 +70,7 @@ def process_image(input_path, output_path):
 # =========================================================
 
 def copy_label(input_label, output_label):
-
+    
     if input_label.exists():
 
         shutil.copy2(

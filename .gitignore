@@ -4,6 +4,6 @@ runs/
 
 yolo*
 
-pcb-defect-dataset-clahe/
+pcb-defect*/
 
-pcb-defect-dataset/
+DexiNed/

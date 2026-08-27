@@ -220,10 +220,7 @@ def apply_clahe(
 # 10. CREATE CLAHE DATASET
 # ============================================================
 
-CLAHE_DATASET_ROOT = (
-    "/content/drive/MyDrive/"
-    "pcb-defect-dataset-clahe"
-)
+CLAHE_DATASET_ROOT= os.path.join(os.getcwd(), "pcb-defect-dataset-clahe")
 
 
 for split in [
@@ -392,7 +389,7 @@ def preprocess_split(split):
 # ============================================================
 # 12. PROCESS TRAIN / VAL / TEST
 # ============================================================
-CLAHE_DATASET_ROOT = "/content/drive/MyDrive/pcb-defect-dataset-clahe"
+CLAHE_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-clahe")
 print("\n==============================================")
 print("STARTING CLAHE PREPROCESSING")
 print("==============================================")
@@ -589,47 +586,3 @@ for filename in sample_files:
     plt.tight_layout()
 
     plt.show()
-
-
-# ============================================================
-# 17. TRAIN CLAHE YOLOv8m
-# ============================================================
-
-print("\n==============================================")
-print("TRAINING CLAHE YOLOv8m")
-print("==============================================")
-
-
-model_clahe = YOLO("yolov8m.pt")
-
-
-CLAHE_RESULTS_DIR = (
-    "./pcb-yolo-results-clahe"
-)
-
-
-model_clahe.train(
-
-    data=CLAHE_DATA_YAML,
-
-    epochs=100,
-
-    imgsz=640,
-
-    batch=16,
-
-    pretrained=True,
-
-    project=CLAHE_RESULTS_DIR,
-
-    name="clahe",
-
-    exist_ok=True,
-
-    patience=20,
-
-    save=True,
-
-    plots=True
-
-)

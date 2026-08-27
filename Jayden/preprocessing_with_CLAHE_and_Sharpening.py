@@ -23,7 +23,7 @@ DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset")
 # 2. HYBRID DATASET PATH
 # ============================================================
 
-HYBRID_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-hybrid")
+HYBRID_DATASET_ROOT = os.path.join(os.getcwd(), "pcb-defect-dataset-clahe-sharpen")
 
 
 # ============================================================
@@ -756,71 +756,3 @@ print(
     "Testing labels    :",
     len(hybrid_test_labels)
 )
-
-
-# ============================================================
-# 16. WINDOWS / COLAB EXECUTION
-# ============================================================
-
-if __name__ == "__main__":
-
-
-    # ========================================================
-    # 17. LOAD YOLOv8m
-    # ========================================================
-
-    print("\n==============================================")
-    print("LOADING YOLOv8m")
-    print("==============================================")
-
-
-    model = YOLO(
-        "yolov8m.pt"
-    )
-
-
-    # ========================================================
-    # 18. TRAIN HYBRID MODEL
-    # ========================================================
-
-    print("\n==============================================")
-    print("TRAINING CLAHE + SHARPENING YOLOv8m")
-    print("==============================================")
-
-
-    RESULTS_DIR = (
-        "./pcb-yolo-results-clahe-sharpening"
-    )
-
-
-    results = model.train(
-
-        data=HYBRID_DATA_YAML,
-
-        epochs=100,
-
-        imgsz=640,
-
-        batch=16,
-
-        pretrained=True,
-
-        project=RESULTS_DIR,
-
-        name="clahe_sharpening",
-
-        exist_ok=True,
-
-        patience=20,
-
-        save=True,
-
-        plots=True,
-
-        workers=8,
-
-        device=0,
-
-        cache=True
-
-    )

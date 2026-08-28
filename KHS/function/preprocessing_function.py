@@ -69,24 +69,27 @@ def clahe(image):
 
     return clahe_processor.apply(image)
 
+def clahe_rgb(image):
+    # RGB -> LAB
+    lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
 
-# =========================
-# 6. EET
-# =========================
-def eet(image):
-    blurred = cv2.GaussianBlur(
-        image,
-        (3, 3),
-        0
-    )
+    # Split L, A, B
+    l, a, b = cv2.split(lab)
 
-    return cv2.addWeighted(
-        image,
-        1.5,
-        blurred,
-        -0.5,
-        0
+    # CLAHE only on L channel
+    clahe = cv2.createCLAHE(
+        clipLimit=2.0,
+        tileGridSize=(8, 8)
     )
+    l = clahe.apply(l)
+
+    # Merge back
+    lab = cv2.merge((l, a, b))
+
+    # LAB -> RGB
+    result = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+
+    return result
 
 def morphological_opening(image):
 
@@ -144,56 +147,3 @@ def display_results(images, titles):
 
     plt.tight_layout()
     plt.show()
-
-
-# =========================
-# MAIN PIPELINE
-# =========================
-def main():
-
-    image_path = (
-        r"C:\Y3S1\image processing\assignment"
-        r"\pcb-defect-dataset\test\images"
-        r"\l_light_01_mouse_bite_05_2_600.jpg"
-    )
-
-    # Pipeline
-    image = load_image(image_path)
-
-    gray = grayscale(image)
-
-    average = average_filter(gray)
-
-    eroded = morphological_erosion(average)
-
-    clahe_image = clahe(eroded)
-
-    edge_enhanced = eet(clahe_image)
-
-    # Results
-    images = [
-        image,
-        gray,
-        average,
-        eroded,
-        clahe_image,
-        edge_enhanced
-    ]
-
-    titles = [
-        "Original",
-        "Grayscale",
-        "Average Filtering",
-        "Morphological Erosion",
-        "CLAHE",
-        "EET"
-    ]
-
-    display_results(images, titles)
-
-
-# =========================
-# Run Program
-# =========================
-if __name__ == "__main__":
-    main()

@@ -6,8 +6,8 @@ runs/
 
 yolo*
 
-find_file.py
+pcb-defect*/
 
-validate.py
+DexiNed/
 
-u-net_training.py
+/KHS/pidinet/

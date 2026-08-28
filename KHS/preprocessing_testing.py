@@ -1,12 +1,12 @@
-from KHS.preprocessing_function import (
+from KHS.function.preprocessing_function import (
+    clahe_rgb,
     grayscale,
     average_filter,
     median_filter,
     morphological_erosion,
     morphological_opening,
     morphological_closing,
-    clahe,
-    eet
+    clahe
 )
 
 import cv2
@@ -20,27 +20,16 @@ from pathlib import Path
 
 def preprocess_image(image):
 
-    # Step 1: Grayscale
-    gray = grayscale(image)
+    median = median_filter(image)
 
-    # Step 2: Median Filtering
-    median = median_filter(gray)
-
-    # Step 3: Morphological Opening
     opened = morphological_opening(median)
 
-    # Step 5: CLAHE
-    clahe_image = clahe(opened)
-
-    # Step 6: EET
-    edge_enhanced = eet(clahe_image)
+    clahe_image = clahe_rgb(opened)
 
     return (
-        gray,
         median,
         opened,
-        clahe_image,
-        edge_enhanced
+        clahe_image
     )
 
 
@@ -83,7 +72,7 @@ def display_results(images, titles):
 def main():
 
     # Image path
-    image_path = Path(r"C:\Y3S1\image processing\assignment\pcb-defect-dataset\test\images\l_light_04_mouse_bite_03_1_600.jpg")
+    image_path = Path(r"C:\Y3S1\image_processing\assignment\pcb-defect-dataset\test\images\l_light_01_missing_hole_04_2_600.jpg")
 
     # =====================================================
     # Load Image
@@ -101,11 +90,10 @@ def main():
     # =====================================================
 
     (
-        gray,
+        # gray,
         median,
         opened,
         clahe_image,
-        edge_enhanced
     ) = preprocess_image(image)
 
     # =====================================================
@@ -114,21 +102,16 @@ def main():
 
     images = [
         image,
-        gray,
         median,
         opened,
-        clahe_image,
-        edge_enhanced
+        clahe_image
     ]
 
     titles = [
         "Original",
-        "Grayscale",
         "Median Filtering",
         "Morphological Opening",
-        "Morphological Closing",
-        "CLAHE",
-        "EET"
+        "CLAHE"
     ]
 
     # =====================================================

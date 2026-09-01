@@ -365,16 +365,12 @@ model = load_model(MODEL_PATHS[selected_pipeline])
 # Friendly short name for captions
 _short = (
     "Median K=9 + CLAHE"
-++
-
-+    if "CLAHE" in selected_pipeline
+    if "CLAHE" in selected_pipeline
     else "Sobel + Solder Mask"
 )
 
 
-# ====================================+
-# =+
-# -*=======================
+# ============================================================
 # 7. USER INTERFACE
 # ============================================================
 

@@ -18,27 +18,72 @@ st.set_page_config(
 
 
 # ============================================================
-# 2. MODEL
+# 2. MODEL PATHS
 # ============================================================
 
-MODEL_PATH = (
-    "../runs/runs/"
-    "yolov8s_with_pcb-defect-dataset-sobel-solder-mask/"
-    "weights/best.pt"
-)
+MODEL_PATHS = {
+    "Median (K=9) + CLAHE  ✨ Best": (
+        "../runs/runs/"
+        "yolov8s_with_pcb-defect-dataset-median-(K=9)-clahe/"
+        "weights/best.pt"
+    ),
+    "Sobel + Solder Mask": (
+        "../runs/runs/"
+        "yolov8s_with_pcb-defect-dataset-sobel-solder-mask/"
+        "weights/best.pt"
+    ),
+}
 
 
 @st.cache_resource
-def load_model():
-    return YOLO(MODEL_PATH)
-
-
-model = load_model()
+def load_model(path: str):
+    return YOLO(path)
 
 
 # ============================================================
-# 3. SOBEL + SOLDER MASK PIPELINE
+# 3. PREPROCESSING PIPELINES
 # ============================================================
+
+def median_clahe(
+    image,
+    kernel_size=9,
+    clip_limit=2.0,
+    tile_grid_size=(8, 8)
+):
+    """
+    Best-performing pipeline: Median (K=9) + CLAHE.
+
+    Steps
+    -----
+    1. Median blur (k=9) -- removes salt-and-pepper noise while
+       preserving PCB trace edges.
+    2. Convert BGR -> LAB colour space.
+    3. Apply CLAHE on the L (luminance) channel -- enhances local
+       contrast without over-brightening saturated colours.
+    4. Merge LAB back -> BGR.
+
+    Returns a BGR image of the same size as the input.
+    """
+
+    # Step 1: Median filtering
+    median_filtered = cv2.medianBlur(image, kernel_size)
+
+    # Step 2: BGR -> LAB
+    lab = cv2.cvtColor(median_filtered, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+
+    # Step 3: CLAHE on luminance channel
+    clahe = cv2.createCLAHE(
+        clipLimit=clip_limit,
+        tileGridSize=tile_grid_size
+    )
+    l = clahe.apply(l)
+
+    # Step 4: Merge and convert back
+    lab = cv2.merge([l, a, b])
+    result = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    return result
+
 
 def sobel_solder_mask(
     image,
@@ -46,63 +91,43 @@ def sobel_solder_mask(
     lower=52,
     upper=78
 ):
+    """
+    Original pipeline: Sobel edge map + Solder Mask highlight.
+
+    Steps
+    -----
+    1. Median blur (k=9).
+    2. Grayscale conversion.
+    3. Solder-mask isolation via pixel-range threshold.
+    4. Sobel X + Y gradient magnitude (normalised to uint8).
+    5. Overlay solder-mask pixels in RED on the edge map.
+
+    Returns a BGR image of the same size as the input.
+    """
 
     # Median filtering
-    filtered = cv2.medianBlur(
-        image,
-        kernel_size
-    )
+    filtered = cv2.medianBlur(image, kernel_size)
 
     # Grayscale
-    gray = cv2.cvtColor(
-        filtered,
-        cv2.COLOR_BGR2GRAY
-    )
+    gray = cv2.cvtColor(filtered, cv2.COLOR_BGR2GRAY)
 
     # Solder mask threshold
-    sold_mask = cv2.inRange(
-        gray,
-        lower,
-        upper
-    )
+    sold_mask = cv2.inRange(gray, lower, upper)
 
     # Sobel X/Y
-    sobel_x = cv2.Sobel(
-        gray,
-        cv2.CV_64F,
-        1,
-        0,
-        ksize=3
-    )
-
-    sobel_y = cv2.Sobel(
-        gray,
-        cv2.CV_64F,
-        0,
-        1,
-        ksize=3
-    )
+    sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+    sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
 
     # Sobel magnitude
-    sobel = (
-        np.abs(sobel_x)
-        + np.abs(sobel_y)
-    )
+    sobel = np.abs(sobel_x) + np.abs(sobel_y)
 
     # Normalize
     sobel = cv2.normalize(
-        sobel,
-        None,
-        0,
-        255,
-        cv2.NORM_MINMAX
+        sobel, None, 0, 255, cv2.NORM_MINMAX
     ).astype(np.uint8)
 
     # Convert to BGR
-    overlay = cv2.cvtColor(
-        sobel,
-        cv2.COLOR_GRAY2BGR
-    )
+    overlay = cv2.cvtColor(sobel, cv2.COLOR_GRAY2BGR)
 
     # Highlight solder-mask regions RED
     overlay[sold_mask > 0] = [0, 0, 255]
@@ -110,11 +135,18 @@ def sobel_solder_mask(
     return overlay
 
 
+# Map pipeline name -> function
+PIPELINES = {
+    "Median (K=9) + CLAHE  ✨ Best": median_clahe,
+    "Sobel + Solder Mask": sobel_solder_mask,
+}
+
+
 # ============================================================
 # 4. IMAGE PROCESSING
 # ============================================================
 
-def process_image(image_bytes):
+def process_image(image_bytes, pipeline_fn, model):
 
     file_bytes = np.asarray(
         bytearray(image_bytes),
@@ -129,10 +161,10 @@ def process_image(image_bytes):
     if original is None:
         return None, None
 
-    # Preprocessing
-    processed = sobel_solder_mask(original)
+    # Preprocessing (selected pipeline)
+    processed = pipeline_fn(original)
 
-    # YOLO
+    # YOLO inference
     results = model(
         processed,
         conf=0.25,
@@ -153,7 +185,7 @@ def process_image(image_bytes):
 # 5. VIDEO PROCESSING
 # ============================================================
 
-def process_video(input_path, output_path):
+def process_video(input_path, output_path, pipeline_fn, model):
 
     cap = cv2.VideoCapture(input_path)
 
@@ -225,10 +257,10 @@ def process_video(input_path, output_path):
             break
 
         # ------------------------------------
-        # Sobel preprocessing
+        # Preprocessing (selected pipeline)
         # ------------------------------------
 
-        processed_frame = sobel_solder_mask(
+        processed_frame = pipeline_fn(
             frame
         )
 
@@ -255,6 +287,7 @@ def process_video(input_path, output_path):
         # ------------------------------------
         # Write frame
         # ------------------------------------
+
 
         out.write(
             annotated_frame
@@ -294,23 +327,66 @@ def process_video(input_path, output_path):
         f"Completed {frame_count} frames."
     )
 
+
     return True, None
 
 
 # ============================================================
-# 6. USER INTERFACE
+# 6. SIDEBAR -- PIPELINE & MODEL SELECTION
+# ============================================================
+
+with st.sidebar:
+    st.header("⚙️ Configuration")
+
+    selected_pipeline = st.selectbox(
+        "Preprocessing Pipeline",
+        list(MODEL_PATHS.keys()),
+        index=0,          # Default: best model
+        help=(
+            "Choose the preprocessing pipeline.\n\n"
+            "**Median (K=9) + CLAHE** — best overall metrics "
+            "(highest mAP50 / F1).\n\n"
+            "**Sobel + Solder Mask** — edge-based pipeline with "
+            "explicit solder-mask highlighting."
+        )
+    )
+
+    st.divider()
+    st.caption(
+        "**Median (K=9) + CLAHE** applies median blur then "
+        "CLAHE contrast enhancement in LAB space.\n\n"
+        "**Sobel + Solder Mask** computes Sobel edge gradients "
+        "and highlights solder-mask regions in red."
+    )
+
+pipeline_fn = PIPELINES[selected_pipeline]
+model = load_model(MODEL_PATHS[selected_pipeline])
+
+# Friendly short name for captions
+_short = (
+    "Median K=9 + CLAHE"
+++
+
++    if "CLAHE" in selected_pipeline
+    else "Sobel + Solder Mask"
+)
+
+
+# ====================================+
+# =+
+# -*=======================
+# 7. USER INTERFACE
 # ============================================================
 
 st.title("🔍 PCB Defect Detection System")
 
 st.write(
-    "YOLOv8s PCB defect detection using "
-    "Sobel + Solder Mask preprocessing."
+    f"YOLOv8s PCB defect detection · active pipeline: **{_short}**"
 )
 
 
 # ============================================================
-# 7. SELECT INPUT TYPE
+# 8. SELECT INPUT TYPE
 # ============================================================
 
 input_type = st.radio(
@@ -321,7 +397,7 @@ input_type = st.radio(
 
 
 # ============================================================
-# 8. IMAGE MODE
+# 9. IMAGE MODE
 # ============================================================
 
 if input_type == "Images":
@@ -352,7 +428,9 @@ if input_type == "Images":
             )
 
             processed, annotated = process_image(
-                uploaded_file.getvalue()
+                uploaded_file.getvalue(),
+                pipeline_fn,
+                model
             )
 
             if processed is None:
@@ -384,7 +462,7 @@ if input_type == "Images":
 
                 st.image(
                     processed_rgb,
-                    caption="Sobel + Solder Mask",
+                    caption=f"Preprocessed — {_short}",
                     use_container_width=True
                 )
 
@@ -418,7 +496,7 @@ if input_type == "Images":
 
 
 # ============================================================
-# 9. VIDEO MODE
+# 10. VIDEO MODE
 # ============================================================
 
 else:
@@ -466,7 +544,7 @@ else:
 
             output_path = tempfile.NamedTemporaryFile(
                 delete=False,
-                suffix="_sobel_detection.mp4"
+                suffix="_detection.mp4"
             ).name
 
             # ------------------------------------
@@ -479,7 +557,9 @@ else:
 
                 success, error = process_video(
                     input_path,
-                    output_path
+                    output_path,
+                    pipeline_fn,
+                    model
                 )
 
             if success:
@@ -516,9 +596,7 @@ else:
                 st.download_button(
                     label="⬇ Download Processed Video",
                     data=video_bytes,
-                    file_name=(
-                        "pcb_sobel_yolo_detection.mp4"
-                    ),
+                    file_name="pcb_yolo_detection.mp4",
                     mime="video/mp4"
                 )
 

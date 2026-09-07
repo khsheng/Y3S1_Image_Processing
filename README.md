@@ -9,9 +9,9 @@
 
 | Name | Folder | Primary Responsibility |
 |---|---|---|
-| **Tan Jin Yuan** | `Jayden/` | Sobel Image Edge Detection & Preprocessing Experiments |
-| **Khoo Hou Sheng** | `ktyj/` | CLAHE Pipeline, YOLOv8 Training, Streamlit App & Evaluation |
-| **Chen Xiang Hui** | `KHS/` | PiDiNet Edge Detection & Deep Edge Feature Fusion |
+| **Chen Xiang Hui** | `Jayden/` | Sobel Image Edge Detection & Preprocessing Experiments |
+| **Tan Jin Yuan** | `ktyj/` | CLAHE Pipeline, YOLOv8 Training, Streamlit App & Evaluation |
+| **Khoo Hou Sheng** | `KHS/` | PiDiNet Edge Detection & Deep Edge Feature Fusion |
 
 ---
 

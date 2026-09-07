@@ -1,7 +1,7 @@
 pcb-defect-*/
-
+__pycache__/
 PCB-Defect-*/
-
+.idea/
 runs/
 
 yolo*

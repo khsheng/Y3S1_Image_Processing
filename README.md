@@ -1,4 +1,4 @@
-﻿# PCB Defect Inspection System
+# PCB Defect Inspection System
 **Course:** BMDS2133 Image Processing
 
 **Name:** Tan Jin Yuan (25WMR12328), Khoo Hou Sheng (25WMR03473), Chen Xiang Hui (25WMR12896)
@@ -24,14 +24,15 @@ This project implements an automated PCB defect detection and classification sys
 ---
 
 ## Repository Structure
-
+Note: The dataset will not be included in submission due to size constraints. 
 ```
 Y3S1_Image_Processing/
 │
 ├── README.md                             ← You are here
 ├── flowchart.png                         ← System architecture flowchart
 ├── training.py                           ← YOLOv8 model training script
-├── yolov8s.pt                            ← Base YOLOv8s pretrained weights
+│
+├── runs/                                 ← Trained YOLOv8 models & evaluation runs (weights)
 │
 ├── ktyj/                                 ← Tan Jin Yuan
 │   ├── pipeline1.ipynb                   ← Main experiment notebook (pipelines + training)
@@ -61,9 +62,7 @@ Y3S1_Image_Processing/
 │   └── data.yaml                         ← Dataset config (paths + class names)
 │
 ├── pcb-defect-dataset-sobel-solder-mask/ ← Preprocessed Dataset (Median + Sobel + Solder Mask Threshold)
-├── pcb-defect-dataset-solder-mask/       ← Preprocessed: Dataset (Median + Solder Mask Threshold)
-├── demo_preprocessed/                    ← Sample outputs from preprocessing pipelines
-└── edge_detection/                       ← Edge detection outputs and demos
+└── pcb-defect-dataset-solder-mask/       ← Preprocessed Dataset (Median + Solder Mask Threshold)
 ```
 
 ---
